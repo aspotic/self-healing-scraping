@@ -1,0 +1,46 @@
+CSS Selector Method:
+- iterate over sources
+    - iterate urls with data we know is correct
+        -build css selector paths
+            -get paths on the url
+                -find tags in page with the content we want
+                    -work backwards to build out how the tags are nested until the terminal tag is reached
+                        -store the tag name
+                        -store the tag attributes
+                        -find out where in the hierarchy this tag sits as a sibling and store the position
+                        -go to parent tag and repeat
+                    -work back in to actually build the selector path
+                        -look for an ID
+                            -if there is an ID then drop parent tags from the selector path
+                            -test new selector on all urls for the source
+                            -if the data is found on enough other urls with known accurate data then add ID to selector and go to next tag
+                        -if no ID then look for classes
+                            -if there is a class then drop parent tags from the selector path
+                            -get all combination of classes possible
+                            -iterate over the class combinations in the selector
+                                -test new selector on all urls for the source
+                                    -if no more than one top level tag is found on all other urls for the source
+                                    - and if the data is found on enough other urls with known accurate data for the source then store the results
+                            -add the Class combination that resulted in the most found data to selector
+                        -if no ID or class then look for other attributes
+                            -if there is another attribute then drop parent tags from the selector path
+                            -get all other attributes
+                            -iterate over the other attributes as the attribute in the selector
+                                -test new selector on all urls for the source
+                                    -if no more than one top level tag is found on all other urls for the source
+                                    - and if the data is found on enough other urls with known accurate data for the source then store the results
+                            -add the attribute that resulted in the most found data to selector
+                        -if no ID or class other other attribute then look for sibling tags of the same type
+                            -if this is not the first sibling, then add nth-of-type to the selector
+                            -test new selector on all urls for the source
+                            -if the data is found on enough other urls with known accurate data then add the nth-of-type field to selector
+                            -if the data is not found on enough other urls with know accurate data then consider this selector garbage at this point
+        -group selectors by content type (e.g: {'selector path': {'content type found': [], 'other content type found': [], ...}})
+            -add the positions at which the content was found if the position is not within a position of some other content (e.g: {'selector path': {'content type found': [(5, 10), (15, 20)], 'other content type found': [(11, 14)], ...}})
+        -prioritize the selectors found for each content type
+            -metric 1: How many types of data are found using the selector? not much is less good than more, but not as good as a large amount?
+            -metric 2: How much useless content is also found using the selector? Less = better
+            -metric 3: How long is the selector, number of IDs in it, number of classes in it, number of other attributes in it?
+            -drop any selectors that fall below a certain quality score
+
+When using the selectors for a data type, use the highest priority one first and if it fails then fall down the list of selectors
